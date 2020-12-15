@@ -3,6 +3,7 @@ const tasksService = require('./tasks.service');
 const { catchErrors } = require('../catch-errors');
 const { NOT_FOUND, BAD_REQUEST, NO_CONTENT, OK } = require('http-status-codes');
 const { ClientError } = require('../error-classes');
+const Tasks = require('./tasks.model');
 
 router.route('/').get(
   catchErrors(async (req, res) => {
@@ -11,7 +12,7 @@ router.route('/').get(
     if (!tasks) {
       throw new ClientError(NOT_FOUND);
     }
-    await res.status(OK).json(tasks);
+    await res.status(OK).json(tasks.map(Tasks.toResponse));
   })
 );
 
@@ -22,7 +23,7 @@ router.route('/:taskId').get(
     if (!task) {
       throw new ClientError(NOT_FOUND);
     }
-    await res.status(OK).json(task);
+    await res.status(OK).json(Tasks.toResponse(task));
   })
 );
 
@@ -41,7 +42,7 @@ router.route('/').post(
       boardId,
       columnId
     });
-    await res.status(OK).json(task);
+    await res.status(OK).json(Tasks.toResponse(task));
   })
 );
 
@@ -78,55 +79,5 @@ router.route('/:taskId').delete(
     await res.status(NO_CONTENT).send('Task was removed');
   })
 );
-
-router.route('/').get(async (req, res) => {
-  const boardId = req.params.id;
-  const tasks = await tasksService.getTasksByBoardId(boardId);
-  await res.json(tasks);
-});
-
-router.route('/:taskId').get(async (req, res) => {
-  const { taskId } = req.params;
-  const task = await tasksService.getTaskById(taskId);
-  if (!task) {
-    res.status(404);
-  }
-  await res.json(task);
-});
-
-router.route('/').post(async (req, res) => {
-  const boardId = req.params.id;
-  const { title, order, description, userId, columnId } = req.body;
-  const task = await tasksService.createTask({
-    title,
-    order,
-    description,
-    userId,
-    boardId,
-    columnId
-  });
-  await res.json(task);
-});
-
-router.route('/:taskId').put(async (req, res) => {
-  const taskId = req.params.taskId;
-  const { boardId, title, order, description, userId, columnId } = req.body;
-  const updatedTask = await tasksService.updateTask({
-    boardId,
-    taskId,
-    title,
-    order,
-    description,
-    userId,
-    columnId
-  });
-  await res.json(updatedTask);
-});
-
-router.route('/:taskId').delete(async (req, res) => {
-  const taskId = req.params.taskId;
-  const isDeleted = await tasksService.deleteTask(taskId);
-  await res.json(isDeleted);
-});
 
 module.exports = router;

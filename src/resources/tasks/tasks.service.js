@@ -1,4 +1,4 @@
-const tasksRepo = require('./tasks.memory.repository');
+const tasksRepo = require('./tasks.db.repository');
 const Task = require('./tasks.model');
 
 const createTask = data => {
@@ -27,7 +27,7 @@ const deleteTasksByBoardId = id => {
 };
 
 const unassignTasks = id => {
-  tasksRepo.unassignTasks(id);
+  return tasksRepo.unassignTasks(id);
 };
 
 module.exports = {
