@@ -28,7 +28,7 @@ const deleteBoard = async id => {
   if (isDeleted) {
     tasksService.deleteTasksByBoardId(id);
   }
-  return isDeleted ? board : false;
+  return isDeleted && board;
 };
 
 module.exports = { getAll, createBoard, getBoard, updateBoard, deleteBoard };
